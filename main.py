@@ -69,8 +69,8 @@ def evaluate(test_set, enc, dec, print_sentences=True):
                 target_sentence_text = "".join([dec.vocab.i2w[i] for i in target_sentence])
                 decoded_sentence_text = "".join([dec.vocab.i2w[i] for i in decoded_tokens])
                 input_sentence_text = input_sentence_text[:input_sentence_text.index(PAD_CHAR)]
-                target_sentence_text = target_sentence_text[:target_sentence_text.index(PAD_CHAR)]
-                decoded_sentence_text = decoded_sentence_text[:decoded_sentence_text.index(PAD_CHAR)]
+                # target_sentence_text = target_sentence_text[:target_sentence_text.index(PAD_CHAR)]
+                # decoded_sentence_text = decoded_sentence_text[:decoded_sentence_text.index(PAD_CHAR)]
                 print(f'input:    {input_sentence_text}')
                 print(f'expected: {target_sentence_text}')
                 print(f'result:   {decoded_sentence_text}')
@@ -172,7 +172,7 @@ def train(n_epochs, train_set, dev_set, enc, dec, criterion,
 
 
 dataset = pd.read_json(DATASET_PATH)
-dataset = dataset.sample(frac=0.01)
+# dataset = dataset.sample(frac=0.01)
 train_sentences, dev_sentences = train_test_split(dataset)
 vocab = joblib.load(VOCAB_PATH)
 # general settings, to be used with all the models
@@ -186,7 +186,7 @@ n_epochs = 10
 
 
 
-# print('--- Training Simple Model ---') chaim
+# print('--- Training Simple Model ---')
 enc1 = EncoderRNN(enc_input_size, enc_hidden_size, vocab, device=device).to(device)
 dec1 = DecoderSimple(dec_input_size, dec_hidden_size, vocab, device=device).to(device)
 criterion1 = nn.CrossEntropyLoss()
