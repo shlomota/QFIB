@@ -15,7 +15,10 @@ MAX_LEN = 256
 MAX_MASK_LEN = 25
 DATASET_PATH = "data/dataset.json"
 VOCAB_PATH = "data/vocab.pkl"
-MAX_MASK = 5
+MASK_RATIO = 0.15
+# MAX_MASK = 5
+
+UNIFORM_MASK = False
 
 def generate_dataset():
     with open("data/data.txt", "r", encoding="utf8") as f:
@@ -47,11 +50,15 @@ def generate_dataset():
     dataset = pd.DataFrame(columns=["x", "y"])
 
     for processed_sent in tqdm(processed):
-        mask_len = random.randint(1, min(len(processed_sent), MAX_MASK))
+        # mask_len = random.randint(1, min(len(processed_sent), MAX_MASK))
+        mask_len = int(MASK_RATIO * list(processed_sent).index(vocab.w2i[PAD_CHAR]))
         start_mask = random.randint(0, list(processed_sent).index(vocab.w2i[PAD_CHAR]) - mask_len)
         #masking
-        y = np.full(MAX_MASK_LEN, vocab.w2i[PAD_CHAR])
-        y[:mask_len] = processed_sent[start_mask:start_mask + mask_len].copy()
+        if UNIFORM_MASK:
+            y = np.full(MAX_MASK_LEN, vocab.w2i[PAD_CHAR])
+            y[:mask_len] = processed_sent[start_mask:start_mask + mask_len].copy()
+        else:
+            y = processed_sent[start_mask:start_mask + mask_len].copy()
         x = processed_sent.copy()
         x[start_mask:start_mask + mask_len] = vocab.w2i[MASK_CHAR]
         dataset.loc[len(dataset)] = [x, y]
