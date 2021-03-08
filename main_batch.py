@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 from vocabulary import Vocabulary
 import os
 import numpy as np
-BATCH_SIZE = 64
+BATCH_SIZE = 32
 
 device = "cuda:0"
 # device = "cuda:0"
@@ -38,6 +38,20 @@ def plot_accuracies(train_accs, dev_accs, model_name):
     plt.savefig(os.path.join("figures", f'{model_name}.png'))
 
     plt.show()
+
+
+def plot_loss(loss, model_name):
+    plt.clf()
+    plt.title(model_name)
+    plt.xlabel('epoch')
+    plt.ylabel('loss')
+    plt.plot(loss)
+    plt.legend()
+    plt.grid(True)
+    plt.savefig(os.path.join("figures", f'{model_name}_loss.png'))
+    plt.show()
+
+
 
 def evaluate(test_set, enc, dec, print_sentences=True):
     total = 0
@@ -64,9 +78,11 @@ def evaluate(test_set, enc, dec, print_sentences=True):
                                   evaluation_mode=True)
             decoded_indices = torch.argmax(decoder_outputs, dim=-1)
 
+            # decoded_indices = torch.tensor([dec.vocab.w2i[" "]] * len(decoded_indices.flatten())).to(device)
             # correct += sum(decoded_indices.flatten() == target_tensor.flatten()).item()
             correct += sum(torch.logical_and(decoded_indices.flatten() == target_tensor.flatten(), target_tensor.flatten() != dec.vocab.w2i[PAD_CHAR])).item()
-            total += len(decoded_indices.flatten())
+            total += sum(target_tensor.flatten() != dec.vocab.w2i[PAD_CHAR]).item()
+            # total += len(decoded_indices.flatten())
 
         #
         #     if print_sentences:
@@ -209,3 +225,4 @@ criterion1 = nn.CrossEntropyLoss()
 losses1, train_accs1, dev_accs1 = train(n_epochs, train_sentences, dev_sentences,
                                         enc1, dec1, criterion1, print_sentences=do_print)
 plot_accuracies(train_accs1, dev_accs1, 'simple_decoder')
+plot_loss(losses1, 'simple_decoder')

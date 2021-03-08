@@ -28,7 +28,7 @@ class DecoderAttention(DecoderSimple):
         first_input = self.embedding(start_index)
         first_inputs = torch.stack([first_input] * batch_size)
 
-        predicted_outputs = [first_inputs, ]
+        predicted_outputs = [torch.stack([start_index] * batch_size), ]
         current_h = self.W_p(h).squeeze(1)
 
         tf_thresh = 0.1
