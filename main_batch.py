@@ -1,4 +1,5 @@
-from gru_decoder import DecoderSimple
+from gru_decoder_batch import DecoderSimple
+from gru_attn_decoder import DecoderAttention
 from gru_encoder import EncoderRNN
 import random
 import torch
@@ -43,43 +44,47 @@ def evaluate(test_set, enc, dec, print_sentences=True):
     correct = 0
 
     with torch.no_grad():
-        for pair in test_set[["x", "y"]].values:
-            input_sentence, target_sentence = pair
-            input_tensor = torch.tensor(input_sentence).to(device).unsqueeze(1)
-            target_tensor = torch.tensor(target_sentence).to(device).unsqueeze(1)
+        num_batches = int(np.ceil(len(test_set) / BATCH_SIZE))
+        # random.shuffle(train_set)
 
+        for i in tqdm(range(num_batches)):
+            # x, y = train_set[["x", "y"]].values[:,:]
+            x_batch = test_set["x"].values[i*BATCH_SIZE:(i+1)*BATCH_SIZE]
+            y_batch = test_set["y"].values[i*BATCH_SIZE:(i+1)*BATCH_SIZE]
 
-            encoder_outputs, encoder_h_m = enc(input_tensor)#, encoder_hidden_first)
+            input_tensor = torch.tensor(np.stack(x_batch)).to(device).long()
+            target_tensor = torch.tensor(np.stack(y_batch)).to(device).long()
 
-            decoder_hidden = encoder_h_m
+            encoder_outputs, encoder_h_m = enc(input_tensor)
+            decoder_hidden = torch.transpose(encoder_h_m, 0, 1)
+
 
             decoder_outputs = dec(target_tensor, decoder_hidden,
                                   enc_outputs=encoder_outputs, enc_input=input_tensor,
                                   evaluation_mode=True)
-            decoded_indices = torch.argmax(decoder_outputs, dim=1)
-            decoded_tokens = [idx.item() for idx in decoded_indices]
+            decoded_indices = torch.argmax(decoder_outputs, dim=-1)
 
+            # correct += sum(decoded_indices.flatten() == target_tensor.flatten()).item()
+            correct += sum(torch.logical_and(decoded_indices.flatten() == target_tensor.flatten(), target_tensor.flatten() != dec.vocab.w2i[PAD_CHAR])).item()
+            total += len(decoded_indices.flatten())
 
-            if decoded_tokens == target_sentence:
-                correct += 1
-            total += 1
-
-            if print_sentences:
-                input_sentence_text = "".join([dec.vocab.i2w[i] for i in input_sentence])
-                target_sentence_text = "".join([dec.vocab.i2w[i] for i in target_sentence])
-                decoded_sentence_text = "".join([dec.vocab.i2w[i] for i in decoded_tokens])
-                input_sentence_text = input_sentence_text[:input_sentence_text.index(PAD_CHAR)]
-                target_sentence_text = target_sentence_text[:target_sentence_text.index(PAD_CHAR)]
-                decoded_sentence_text = decoded_sentence_text[:decoded_sentence_text.index(PAD_CHAR)]
-                print(f'input:    {input_sentence_text}')
-                print(f'expected: {target_sentence_text}')
-                print(f'result:   {decoded_sentence_text}')
+        #
+        #     if print_sentences:
+        #         input_sentence_text = "".join([dec.vocab.i2w[i] for i in input_sentence])
+        #         target_sentence_text = "".join([dec.vocab.i2w[i] for i in target_sentence])
+        #         decoded_sentence_text = "".join([dec.vocab.i2w[i] for i in decoded_tokens])
+        #         input_sentence_text = input_sentence_text[:input_sentence_text.index(PAD_CHAR)]
+        #         target_sentence_text = target_sentence_text[:target_sentence_text.index(PAD_CHAR)]
+        #         decoded_sentence_text = decoded_sentence_text[:decoded_sentence_text.index(PAD_CHAR)]
+        #         print(f'input:    {input_sentence_text}')
+        #         print(f'expected: {target_sentence_text}')
+        #         print(f'result:   {decoded_sentence_text}')
 
     accuracy = correct / total
     return accuracy
 
-def train_single_example(input_tensor, target_tensor, enc, dec,
-                         enc_optimizer, dec_optimizer, criterion):
+def train_batch(input_tensor, target_tensor, enc, dec,
+                enc_optimizer, dec_optimizer, criterion):
 
     enc_optimizer.zero_grad()
     dec_optimizer.zero_grad()
@@ -88,19 +93,21 @@ def train_single_example(input_tensor, target_tensor, enc, dec,
     # target_length = target_tensor.size(0)
 
     encoder_outputs, encoder_h_m = enc(input_tensor)
-    decoder_hidden = encoder_h_m
+    decoder_hidden = torch.transpose(encoder_h_m, 0, 1)
     decoder_outputs = dec(target_tensor, decoder_hidden, enc_input=input_tensor, enc_outputs=encoder_outputs)
 
-    decoder_outputs = decoder_outputs.view(-1, dec.output_size)
     criterion_target = target_tensor.view(-1)
 
-    loss = criterion(decoder_outputs, criterion_target)
+    decoder_outputs = decoder_outputs.view(-1, dec.output_size)
+
+    indices = (criterion_target != dec.vocab.w2i[PAD_CHAR]).nonzero(as_tuple=True)
+    loss = criterion(decoder_outputs[indices], criterion_target[indices])
     loss.backward()
 
     enc_optimizer.step()
     dec_optimizer.step()
 
-    return loss.item() / (target_tensor.shape[0] * target_tensor.shape[1])
+    return loss.item() / (decoder_outputs.shape[0])
 
 
 def train(n_epochs, train_set, dev_set, enc, dec, criterion,
@@ -130,8 +137,8 @@ def train(n_epochs, train_set, dev_set, enc, dec, criterion,
             x_batch = torch.tensor(np.stack(x_batch)).to(device).long()
             y_batch = torch.tensor(np.stack(y_batch)).to(device).long()
 
-            loss = train_single_example(x_batch, y_batch, enc, dec,
-                                        encoder_optimizer, decoder_optimizer, criterion)
+            loss = train_batch(x_batch, y_batch, enc, dec,
+                               encoder_optimizer, decoder_optimizer, criterion)
             epoch_loss += loss
 
         # for x, y in tqdm(train_set[["x", "y"]].values):
@@ -154,7 +161,7 @@ def train(n_epochs, train_set, dev_set, enc, dec, criterion,
         dev_accuracies.append(dev_accuracy)
 
         print(f'Epoch #{epoch}:\n'
-              f'Loss: {average_loss:.4f}\n'
+              f'Loss: {average_loss:.7f}\n'
               f'Train accuracy: {train_accuracy:.6f}\n'
               f'Dev accuracy: {dev_accuracy:.6f}')
               # f'Time elapsed (remaining): {timeSince(start, epoch / n_epochs)}')
@@ -179,7 +186,7 @@ def train(n_epochs, train_set, dev_set, enc, dec, criterion,
 
 
 dataset = pd.read_json(DATASET_PATH)
-dataset = dataset.sample(frac=0.01)
+# dataset = dataset.sample(frac=0.1)
 train_sentences, dev_sentences = train_test_split(dataset)
 vocab = joblib.load(VOCAB_PATH)
 # general settings, to be used with all the models
@@ -190,14 +197,15 @@ dec_input_size = 256
 dec_hidden_size = 256
 
 n_epochs = 10
-
+do_print = False
 
 
 # print('--- Training Simple Model ---') chaim
 enc1 = EncoderRNN(enc_input_size, enc_hidden_size, vocab, device=device).to(device)
-dec1 = DecoderSimple(dec_input_size, dec_hidden_size, vocab, device=device).to(device)
+# dec1 = DecoderSimple(dec_input_size, dec_hidden_size, vocab, device=device).to(device)
+dec1 = DecoderAttention(dec_input_size, dec_hidden_size, vocab, device=device).to(device)
 criterion1 = nn.CrossEntropyLoss()
 
 losses1, train_accs1, dev_accs1 = train(n_epochs, train_sentences, dev_sentences,
-                                        enc1, dec1, criterion1, print_sentences=True)
+                                        enc1, dec1, criterion1, print_sentences=do_print)
 plot_accuracies(train_accs1, dev_accs1, 'simple_decoder')

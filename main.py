@@ -19,6 +19,11 @@ BATCH_SIZE = 64
 device = "cuda:0"
 # device = "cuda:0"
 
+def save_model(enc, dec, epoch, postfix=''):
+    torch.save(enc, os.path.join("parameters", f'enc_{epoch}{postfix}.pt'))
+    torch.save(dec, os.path.join("parameters", f'dec_{epoch}{postfix}.pt'))
+
+
 def plot_accuracies(train_accs, dev_accs, model_name):
 
     plt.clf()
@@ -60,12 +65,15 @@ def evaluate(test_set, enc, dec, print_sentences=True):
             decoded_tokens = [idx.item() for idx in decoded_indices]
 
 
-            if decoded_tokens == target_sentence:
-                correct += 1
-            total += 1
+            correct += sum(np.array(decoded_tokens) == target_sentence)
+            total += len(decoded_tokens)
+            # if decoded_tokens == target_sentence:
+            #     correct += 1
+            # total += 1
 
             if print_sentences:
-                input_sentence_text = "".join([dec.vocab.i2w[i] for i in input_sentence])
+                print_sentences = False # TODO: remove
+                input_sentence_text = "".join([dec.vocab.i2w[i] for i in input_sentence[1:]])
                 target_sentence_text = "".join([dec.vocab.i2w[i] for i in target_sentence])
                 decoded_sentence_text = "".join([dec.vocab.i2w[i] for i in decoded_tokens])
                 input_sentence_text = input_sentence_text[:input_sentence_text.index(PAD_CHAR)]
@@ -153,8 +161,8 @@ def train(n_epochs, train_set, dev_set, enc, dec, criterion,
               # f'Time elapsed (remaining): {timeSince(start, epoch / n_epochs)}')
 
 
-        # if save:
-        #     save_model(enc, dec, epoch)
+        if save:
+            save_model(enc, dec, epoch)
 
         if dev_accuracy > best_dev_accuracy:
             best_dev_accuracy = dev_accuracy

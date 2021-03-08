@@ -12,13 +12,13 @@ MASK_CHAR = "_"
 PAD_CHAR = "p"
 SOS_CHAR = "s"
 MAX_LEN = 256
-MAX_MASK_LEN = 25
+MAX_MASK_LEN = 40
 DATASET_PATH = "data/dataset.json"
 VOCAB_PATH = "data/vocab.pkl"
 MASK_RATIO = 0.15
 # MAX_MASK = 5
 
-UNIFORM_MASK = False
+UNIFORM_MASK = True
 
 def generate_dataset():
     with open("data/data.txt", "r", encoding="utf8") as f:
