@@ -43,10 +43,10 @@ class DecoderAttention(DecoderSimple):
                 input_ = self.embedding(predicted_outputs[-1])
             current_h = self.gru_cell(input_, current_h)
             # weights = current_h @ self.W_a(attention_tensor).squeeze().T
-            weights = current_h.unsqueeze(1).bmm(self.W_a(attention_tensor).transpose(1,2)).squeeze()
+            weights = current_h.unsqueeze(1).bmm(self.W_a(attention_tensor).transpose(1,2)).squeeze(1)
             probs = nn.Softmax(dim=-1)(weights/(self.hidden_size**0.5)) #normalization like in Attention is all you need
             # attentioned = probs @ attention_tensor.squeeze()
-            attentioned = probs.unsqueeze(1).bmm(attention_tensor).squeeze()
+            attentioned = probs.unsqueeze(1).bmm(attention_tensor).squeeze(1)
             with_hidden = torch.cat([current_h, attentioned], dim=-1)
             current_output = self.W_s(with_hidden)
             outputs.append(current_output)
