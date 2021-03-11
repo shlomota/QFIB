@@ -15,10 +15,15 @@ import matplotlib.pyplot as plt
 from vocabulary import Vocabulary
 import os
 import numpy as np
+
 BATCH_SIZE = 32
 
 device = "cuda:0"
-# device = "cuda:0"
+
+def save_model(enc, dec, epoch, postfix=''):
+    torch.save(enc, os.path.join("parameters", f'enc_{epoch}{postfix}.pt'))
+    torch.save(dec, os.path.join("parameters", f'dec_{epoch}{postfix}.pt'))
+
 
 def plot_accuracies(train_accs, dev_accs, model_name):
 
@@ -84,17 +89,17 @@ def evaluate(test_set, enc, dec, print_sentences=True):
             total += sum(target_tensor.flatten() != dec.vocab.w2i[PAD_CHAR]).item()
             # total += len(decoded_indices.flatten())
 
-        #
-        #     if print_sentences:
-        #         input_sentence_text = "".join([dec.vocab.i2w[i] for i in input_sentence])
-        #         target_sentence_text = "".join([dec.vocab.i2w[i] for i in target_sentence])
-        #         decoded_sentence_text = "".join([dec.vocab.i2w[i] for i in decoded_tokens])
-        #         input_sentence_text = input_sentence_text[:input_sentence_text.index(PAD_CHAR)]
-        #         target_sentence_text = target_sentence_text[:target_sentence_text.index(PAD_CHAR)]
-        #         decoded_sentence_text = decoded_sentence_text[:decoded_sentence_text.index(PAD_CHAR)]
-        #         print(f'input:    {input_sentence_text}')
-        #         print(f'expected: {target_sentence_text}')
-        #         print(f'result:   {decoded_sentence_text}')
+
+            if print_sentences and i % 10 == 0:
+                input_sentence_text = "".join([dec.vocab.i2w[i] for i in x_batch[0]])
+                target_sentence_text = "".join([dec.vocab.i2w[i] for i in y_batch[0]])
+                decoded_sentence_text = "".join([dec.vocab.i2w[i] for i in decoded_indices[0].tolist()])
+                input_sentence_text = input_sentence_text[:input_sentence_text.find(PAD_CHAR)]
+                target_sentence_text = target_sentence_text[:target_sentence_text.find(PAD_CHAR)]
+                decoded_sentence_text = decoded_sentence_text[:decoded_sentence_text.find(PAD_CHAR)]
+                print(f'input:    {input_sentence_text}')
+                print(f'expected: {target_sentence_text}')
+                print(f'result:   {decoded_sentence_text}')
 
     accuracy = correct / total
     return accuracy
@@ -183,8 +188,8 @@ def train(n_epochs, train_set, dev_set, enc, dec, criterion,
               # f'Time elapsed (remaining): {timeSince(start, epoch / n_epochs)}')
 
 
-        # if save:
-        #     save_model(enc, dec, epoch)
+        if save:
+            save_model(enc, dec, epoch)
 
         if dev_accuracy > best_dev_accuracy:
             best_dev_accuracy = dev_accuracy
@@ -202,7 +207,7 @@ def train(n_epochs, train_set, dev_set, enc, dec, criterion,
 
 
 dataset = pd.read_json(DATASET_PATH)
-# dataset = dataset.sample(frac=0.1)
+dataset = dataset.sample(frac=0.1)
 train_sentences, dev_sentences = train_test_split(dataset)
 vocab = joblib.load(VOCAB_PATH)
 # general settings, to be used with all the models
@@ -212,11 +217,10 @@ enc_hidden_size = 256
 dec_input_size = 256
 dec_hidden_size = 256
 
-n_epochs = 10
+n_epochs = 40
 do_print = False
 
 
-# print('--- Training Simple Model ---') chaim
 enc1 = EncoderRNN(enc_input_size, enc_hidden_size, vocab, device=device).to(device)
 # dec1 = DecoderSimple(dec_input_size, dec_hidden_size, vocab, device=device).to(device)
 dec1 = DecoderAttention(dec_input_size, dec_hidden_size, vocab, device=device).to(device)
@@ -224,5 +228,5 @@ criterion1 = nn.CrossEntropyLoss()
 
 losses1, train_accs1, dev_accs1 = train(n_epochs, train_sentences, dev_sentences,
                                         enc1, dec1, criterion1, print_sentences=do_print)
-plot_accuracies(train_accs1, dev_accs1, 'simple_decoder')
-plot_loss(losses1, 'simple_decoder')
+plot_accuracies(train_accs1, dev_accs1, 'attention_decoder')
+plot_loss(losses1, 'attention_decoder')
