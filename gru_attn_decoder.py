@@ -31,7 +31,7 @@ class DecoderAttention(DecoderSimple):
         predicted_outputs = [torch.stack([start_index] * batch_size), ]
         current_h = self.W_p(h).squeeze(1)
 
-        tf_thresh = 0.1
+        tf_thresh = 0.5
         attention_tensor = enc_outputs
         embedded_targets = self.embedding(targets)
         embedded_inputs = torch.cat([first_inputs.unsqueeze(1), embedded_targets[:,:-1,:]], dim=1)
@@ -40,6 +40,7 @@ class DecoderAttention(DecoderSimple):
         # for input_ in embedded_inputs:
             input_ = embedded_inputs[:, i, :]
             if evaluation_mode or random.random() < tf_thresh:
+            # if False:
                 input_ = self.embedding(predicted_outputs[-1])
             current_h = self.gru_cell(input_, current_h)
             # weights = current_h @ self.W_a(attention_tensor).squeeze().T

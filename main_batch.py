@@ -80,7 +80,7 @@ def evaluate(test_set, enc, dec, print_sentences=True):
 
             decoder_outputs = dec(target_tensor, decoder_hidden,
                                   enc_outputs=encoder_outputs, enc_input=input_tensor,
-                                  evaluation_mode=True)
+                                  evaluation_mode=False)
             decoded_indices = torch.argmax(decoder_outputs, dim=-1)
 
             # decoded_indices = torch.tensor([dec.vocab.w2i[" "]] * len(decoded_indices.flatten())).to(device)
@@ -204,29 +204,28 @@ def train(n_epochs, train_set, dev_set, enc, dec, criterion,
     return losses, train_accuracies, dev_accuracies
 
 
+if __name__ == "__main__":
+    dataset = pd.read_json(DATASET_PATH)
+    dataset = dataset.sample(frac=0.1)
+    train_sentences, dev_sentences = train_test_split(dataset)
+    vocab = joblib.load(VOCAB_PATH)
+    # general settings, to be used with all the models
+    enc_input_size = 256
+    enc_hidden_size = 256
+
+    dec_input_size = 256
+    dec_hidden_size = 256
+
+    n_epochs = 40
+    do_print = False
 
 
-dataset = pd.read_json(DATASET_PATH)
-dataset = dataset.sample(frac=0.1)
-train_sentences, dev_sentences = train_test_split(dataset)
-vocab = joblib.load(VOCAB_PATH)
-# general settings, to be used with all the models
-enc_input_size = 256
-enc_hidden_size = 256
+    enc1 = EncoderRNN(enc_input_size, enc_hidden_size, vocab, device=device).to(device)
+    # dec1 = DecoderSimple(dec_input_size, dec_hidden_size, vocab, device=device).to(device)
+    dec1 = DecoderAttention(dec_input_size, dec_hidden_size, vocab, device=device).to(device)
+    criterion1 = nn.CrossEntropyLoss()
 
-dec_input_size = 256
-dec_hidden_size = 256
-
-n_epochs = 40
-do_print = False
-
-
-enc1 = EncoderRNN(enc_input_size, enc_hidden_size, vocab, device=device).to(device)
-# dec1 = DecoderSimple(dec_input_size, dec_hidden_size, vocab, device=device).to(device)
-dec1 = DecoderAttention(dec_input_size, dec_hidden_size, vocab, device=device).to(device)
-criterion1 = nn.CrossEntropyLoss()
-
-losses1, train_accs1, dev_accs1 = train(n_epochs, train_sentences, dev_sentences,
-                                        enc1, dec1, criterion1, print_sentences=do_print)
-plot_accuracies(train_accs1, dev_accs1, 'attention_decoder')
-plot_loss(losses1, 'attention_decoder')
+    losses1, train_accs1, dev_accs1 = train(n_epochs, train_sentences, dev_sentences,
+                                            enc1, dec1, criterion1, print_sentences=do_print)
+    plot_accuracies(train_accs1, dev_accs1, 'attention_decoder')
+    plot_loss(losses1, 'attention_decoder')

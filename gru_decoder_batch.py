@@ -37,7 +37,6 @@ class DecoderSimple(nn.Module):
         first_inputs = torch.stack([first_input] * batch_size)
         current_h = self.W_p(h).squeeze(1)
 
-        # almost always use teacher forcing if not evaluation, since evaluation uses exact match
         tf_thresh = 0.5
 
 
