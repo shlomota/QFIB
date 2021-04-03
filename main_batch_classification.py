@@ -24,6 +24,8 @@ import sys
 BATCH_SIZE = 32
 
 device = "cuda:0"
+def my_print(str):
+    sys.stdout.write(str + "\n")
 
 def save_model(enc, epoch, postfix=''):
     torch.save(enc, os.path.join("parameters", f'enc_{epoch}{postfix}.pt'))
@@ -94,9 +96,9 @@ def evaluate(test_set, enc, print_sentences=True):
                 input_sentence_text = input_sentence_text[:input_sentence_text.find(PAD_CHAR)]
                 target_sentence_text = target_sentence_text[:target_sentence_text.find(PAD_CHAR)]
                 decoded_sentence_text = decoded_sentence_text[:decoded_sentence_text.find(PAD_CHAR)]
-                sys.stdout.write(f'input:    {input_sentence_text}')
-                sys.stdout.write(f'expected: {target_sentence_text}')
-                sys.stdout.write(f'result:   {decoded_sentence_text}')
+                my_print(f'input:    {input_sentence_text}')
+                my_print(f'expected: {target_sentence_text}')
+                my_print(f'result:   {decoded_sentence_text}')
 
     accuracy = correct / total
     return accuracy
@@ -163,7 +165,7 @@ def train(n_epochs, train_set, dev_set, enc, criterion,
         dev_accuracy = evaluate(dev_set, enc, print_sentences)
         dev_accuracies.append(dev_accuracy)
 
-        sys.stdout.write(f'Epoch #{epoch}:\n'
+        my_print(f'Epoch #{epoch}:\n'
               f'Loss: {average_loss:.7f}\n'
               f'Train accuracy: {train_accuracy:.6f}\n'
               f'Dev accuracy: {dev_accuracy:.6f}')
@@ -178,7 +180,7 @@ def train(n_epochs, train_set, dev_set, enc, criterion,
         else:
             epochs_without_improvement += 1
             if epochs_without_improvement == patience:
-                sys.stdout.write(f'Training didn\'t improve for {patience} epochs\n'
+                my_print(f'Training didn\'t improve for {patience} epochs\n'
                       f'Stopped Training at epoch {epoch}\n'
                       f'Best epoch: {epoch - patience}')
                 break
