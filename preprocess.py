@@ -13,15 +13,20 @@ PAD_CHAR = "p"
 SOS_CHAR = "s"
 MAX_LEN = 256
 MAX_MASK_LEN = 40
-DATASET_PATH = "data/dataset.json"
-VOCAB_PATH = "data/vocab.pkl"
+
+BASE_PATH = "data"
+RAW_DATA_FILENAME = "data.txt"
+# BASE_PATH = "data/he"
+RAW_DATA_FILENAME = "wikidata.txt"
+DATASET_PATH = os.path.join(BASE_PATH, "dataset.json")
+VOCAB_PATH = os.path.join(BASE_PATH, "vocab.pkl")
 MASK_RATIO = 0.15
 # MAX_MASK = 5
 
 UNIFORM_MASK = True
 
 def generate_dataset():
-    with open("data/data.txt", "r", encoding="utf8") as f:
+    with open(os.path.join(BASE_PATH, RAW_DATA_FILENAME), "r", encoding="utf8") as f:
         sents = f.readlines()
 
     #add sos char
@@ -33,12 +38,12 @@ def generate_dataset():
     if os.path.isfile(VOCAB_PATH):
         vocab = joblib.load(VOCAB_PATH)
     else:
-        cv = CountVectorizer(analyzer="char")
+        cv = CountVectorizer(analyzer="char", encoding="utf8")
         cv.fit(sents+[MASK_CHAR + PAD_CHAR])
         vocab = Vocabulary(cv.vocabulary_)
         joblib.dump(vocab, VOCAB_PATH)
 
-    processed = np.array([[vocab.w2i[char] for char in sent] for sent in padded])
+    processed = np.array([[vocab.w2i[char] for char in sent if char in vocab.w2i] for sent in padded])
 
 
 

@@ -10,8 +10,8 @@ class EncoderRNN(nn.Module):
         self.vocab = vocab
         self.device = device
 
-        self.embedding = nn.Embedding(len(self.vocab.w2i), hidden_size)
-        self.gru = nn.GRU(input_size, hidden_size, batch_first=True)
+        self.embedding = nn.Embedding(len(self.vocab.w2i), input_size)
+        self.gru = nn.GRU(input_size, hidden_size, batch_first=True, num_layers=2)
 
     def forward(self, input):
         ### YOUR CODE HERE
