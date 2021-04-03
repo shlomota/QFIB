@@ -1,6 +1,7 @@
 from gru_decoder_batch import DecoderSimple
 from gru_attn_decoder import DecoderAttention
 from gru_encoder import EncoderRNN
+from gru_model import GRUModel
 import random
 import torch
 from torch import nn
@@ -127,7 +128,6 @@ def train(n_epochs, train_set, dev_set, enc, criterion,
     for epoch in range(1, n_epochs + 1):
         train_set = train_set.sample(frac=1)
         num_batches = int(np.ceil(len(train_set) / BATCH_SIZE))
-        # random.shuffle(train_set)
 
         for i in tqdm(range(num_batches)):
             # x, y = train_set[["x", "y"]].values[:,:]
@@ -191,14 +191,15 @@ if __name__ == "__main__":
     enc_input_size = 256
     enc_hidden_size = 256
 
-    n_epochs = 40
+    n_epochs = 5
     # n_epochs = 5
     do_print = False
 
-    enc1 = EncoderRNN(enc_input_size, enc_hidden_size, vocab, device=device).to(device)
+    # enc1 = EncoderRNN(enc_input_size, enc_hidden_size, vocab, device=device).to(device)
+    model = GRUModel(enc_input_size, enc_hidden_size, len(vocab.w2i), vocab, device=device).to(device)
     criterion1 = nn.CrossEntropyLoss()
 
     losses1, train_accs1, dev_accs1 = train(n_epochs, train_sentences, dev_sentences,
-                                            enc1, criterion1, print_sentences=do_print)
+                                            model, criterion1, print_sentences=do_print)
     plot_accuracies(train_accs1, dev_accs1, 'gru_clf')
     plot_loss(losses1, 'gru_clf')
