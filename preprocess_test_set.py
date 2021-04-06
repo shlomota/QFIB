@@ -4,10 +4,13 @@ import os
 import numpy
 
 def my_filter(line):
-    if len(line) < 30:
+    illegal_li = ["damage", "×", "x", "-", "־", "break", "vacat", "[", "]"]
+    min_len = 30
+    if len(line) < min_len:
         return False
-    if "damage" in line or "break" in line or "vacat" in line or "[" in line:
-        return False
+    if re.search("[^א-ת \n]", line):
+            return False
+
     return True
 
 bad_list = glob(r"C:\Users\soki\Documents\TAU\DL\proj\qumran\megilot\*-index*")

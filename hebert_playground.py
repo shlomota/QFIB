@@ -20,7 +20,8 @@ def fill_multi(text):
         text = "".join(text_li[:1]) + fill_result[0]["token_str"] + "[MASK]".join(text_li[1:])
     return text, prob
 # pprint(fill_mask("הקורונה לקחה את [MASK] ולנו לא נשאר דבר."))
-pprint(fill_mask("בראשית ברא [MASK] את השמים ואת"))
+# pprint(fill_mask("בראשית ברא [MASK] את השמים ואת"))
+pprint(fill_mask("בראשית בר[MASK] אלהים את השמים ואת"))
 # pprint(fill_mask("ואלה שמות בני [MASK] הבאים מצרימה."))
 # pprint(fill_mask("ואלה שמות בני [MASK] הבאים [MASK] את יעקב איש וביתו באו."))
 # pprint(fill_multi("ואלה שמות בני [MASK] הבאים [MASK] את יעקב איש וביתו באו."))
