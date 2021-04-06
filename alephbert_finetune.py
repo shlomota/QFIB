@@ -40,7 +40,7 @@ from transformers import Trainer, TrainingArguments
 training_args = TrainingArguments(
     output_dir="./alephbert",
     overwrite_output_dir=True,
-    num_train_epochs=40,
+    num_train_epochs=10,
     per_gpu_train_batch_size=16,
     save_steps=10_000,
     save_total_limit=2,
