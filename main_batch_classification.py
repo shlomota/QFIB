@@ -190,13 +190,14 @@ def train(n_epochs, train_set, dev_set, enc, criterion,
 
 if __name__ == "__main__":
     # dataset = pd.read_json(r"C:\Users\soki\PycharmProjects\QFIB\data\dataset_only_mask_y.json")
-    dataset = pd.read_json(r"data/dataset_only_mask_y.json")
+    # dataset = pd.read_json(r"data/dataset_only_mask_y.json")
+    dataset = pd.read_json(r"data/full_dataset_only_mask_y.json")
     # dataset = dataset.sample(frac=0.1)
     train_sentences, dev_sentences = train_test_split(dataset)
     vocab = joblib.load(VOCAB_PATH)
     # general settings, to be used with all the models
-    enc_input_size = 256
-    enc_hidden_size = 256
+    enc_input_size = 512
+    enc_hidden_size = 512
 
     n_epochs = 40
     # n_epochs = 5

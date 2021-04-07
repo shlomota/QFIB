@@ -18,6 +18,7 @@ BASE_PATH = "data"
 RAW_DATA_FILENAME = "data.txt"
 # BASE_PATH = "data/he"
 RAW_DATA_FILENAME = "wikidata.txt"
+RAW_DATA_FILENAME = "full_training_set.txt"
 DATASET_PATH = os.path.join(BASE_PATH, "dataset.json")
 VOCAB_PATH = os.path.join(BASE_PATH, "vocab.pkl")
 MASK_RATIO = 0.15
@@ -31,7 +32,7 @@ def generate_dataset():
 
     #add sos char
     sents = [SOS_CHAR + sent for sent in sents]
-    padded = [sent + PAD_CHAR*(MAX_LEN - len(sent)) for sent in sents]
+    padded = [sent[:MAX_LEN] + PAD_CHAR*(MAX_LEN - len(sent)) for sent in sents]
 
 
     # just used to make dict
@@ -56,8 +57,9 @@ def generate_dataset():
 
     for processed_sent in tqdm(processed):
         # mask_len = random.randint(1, min(len(processed_sent), MAX_MASK))
-        mask_len = int(MASK_RATIO * list(processed_sent).index(vocab.w2i[PAD_CHAR]))
-        start_mask = random.randint(0, list(processed_sent).index(vocab.w2i[PAD_CHAR]) - mask_len)
+        sent_len = list(processed_sent).index(vocab.w2i[PAD_CHAR]) if vocab.w2i[PAD_CHAR] in list(processed_sent) else len(processed_sent)
+        mask_len = int(MASK_RATIO * sent_len)
+        start_mask = random.randint(0, sent_len - mask_len)
         #masking
         if UNIFORM_MASK:
             y = np.full(MAX_MASK_LEN, vocab.w2i[PAD_CHAR])
@@ -65,7 +67,7 @@ def generate_dataset():
         else:
             y = processed_sent[start_mask:start_mask + mask_len].copy()
         x = processed_sent.copy()
-        x[start_mask:start_mask + mask_len] = vocab.w2i[MASK_CHAR]
+        x[start_mask:start_mask + mask_len] = [vocab.w2i[MASK_CHAR] for i in range(mask_len)]
         dataset.loc[len(dataset)] = [x, y]
 
     print(dataset.head())
