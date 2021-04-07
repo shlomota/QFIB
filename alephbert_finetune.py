@@ -9,7 +9,7 @@ import logging
 # )
 fill_mask = pipeline(
     "fill-mask",
-    model="./alephbert",
+    model="./alephbert/checkpoint-40000",
     tokenizer="onlplab/alephbert-base"
 )
 
@@ -40,7 +40,7 @@ from transformers import Trainer, TrainingArguments
 training_args = TrainingArguments(
     output_dir="./alephbert",
     overwrite_output_dir=True,
-    num_train_epochs=10,
+    num_train_epochs=30,
     per_gpu_train_batch_size=16,
     save_steps=10_000,
     save_total_limit=2,
@@ -56,8 +56,11 @@ trainer = Trainer(
 
 trainer.train()
 
+trainer.save_model("./alephbert")
+tokenizer.save_pretrained("./alephbert")
+
 logging.info("Started evaluation on train!")
-metrics = trainer.evaluate()
+metrics = trainer.evaluate(eval_dataset=dataset)
 logging.info(metrics)
 print(metrics)
 
@@ -66,5 +69,3 @@ metrics = trainer.evaluate(eval_dataset=eval_dataset)
 logging.info(metrics)
 print(metrics)
 
-trainer.save_model("./alephbert")
-tokenizer.save_pretrained("./alephbert")

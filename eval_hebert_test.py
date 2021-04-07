@@ -36,19 +36,27 @@ def predict_my_model(sent, model):
     preds = torch.argmax(preds, dim=-1)
     return "".join([model.vocab.i2w[index] for index in preds.tolist()])
 
+def get_best_result(results, len_y):
+    for res in results:
+        if len(res["token_str"]) == len_y:
+            return res["token_str"]
+    return results[0]["token_str"]
 
 hebert = pipeline(
     "fill-mask",
     model="avichr/heBERT",
-    tokenizer="avichr/heBERT"
+    tokenizer="avichr/heBERT",
 )
 
 alephbert = pipeline(
     "fill-mask",
-    model="onlplab/alephbert-base",
-    tokenizer="onlplab/alephbert-base"
+    # model="onlplab/alephbert-base",
+    model="./alephbert_1_epoch",
+    tokenizer="onlplab/alephbert-base",
 )
 
+hebert.model.eval()
+alephbert.model.eval()
 gru_model = torch.load(r"C:\Users\soki\PycharmProjects\QFIB\parameters\enc_model_bible\enc_40.pt")
 
 model_names = ["heBERT", "alephBERT", "GRU"]
@@ -65,8 +73,10 @@ correct_tokens = [0] * len(model_names)
 total = 0
 total_tokens = 0
     
+sum_word_len = 0
+sum_predicted_len = 0
+sum_len_diff = 0
 
-    
 for line in tqdm(lines):
     # mask_len = random.randint(1, min(len(processed_sent), MAX_MASK))
     # mask_len = int(MASK_RATIO * len(line))
@@ -86,12 +96,26 @@ for line in tqdm(lines):
     for i in range(len(model_names)):
         if token_based_model[i]:
             updated_line = line[:s] + " [MASK]" + line[e:]
-            result = models[i](updated_line)[0]["token_str"]
+            results = models[i](updated_line, top_k=10)
+            result = get_best_result(results, len(y))
+
+
+            # multi mask
+            while len(result) < len(y):
+                updated_line = line[:s] + " " + result + "[MASK]" + line[e:]
+                results = models[i](updated_line, top_k=10)
+                result += get_best_result(results, len(y) - len(result))
+                # result += models[i](updated_line)[0]["token_str"]
         else:
             updated_line = line[:s] + " " + MASK_CHAR * (e-s-1) + line[e:]
             assert len(updated_line) == len(line)
             result = predict_my_model(updated_line, models[i])
     
+
+        if i == 1:
+            sum_predicted_len += len(result)
+            sum_word_len += len(y)
+            sum_len_diff += abs(len(result) - len(y))
 
         correct[i] += sum(np.array(list(pad_prediction(result, y))) == np.array(list(y)))
     
@@ -105,3 +129,7 @@ for i in range(len(model_names)):
     print(f"Model: {model_names[i]}")
     print(f"char acc: {correct[i]/total}")
     print(f"token acc: {correct_tokens[i] /total_tokens}")
+
+print(f"average prediction: {sum_predicted_len/total_tokens}")
+print(f"average masked word: {sum_word_len/total_tokens}")
+print(f"average abs len diff: {sum_len_diff/total_tokens}")
