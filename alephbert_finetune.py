@@ -10,7 +10,7 @@ import logging
 fill_mask = pipeline(
     "fill-mask",
     model="./alephbert",
-    tokenizer="./alephbert"
+    tokenizer="onlplab/alephbert-base"
 )
 
 from transformers import LineByLineTextDataset
@@ -67,3 +67,4 @@ logging.info(metrics)
 print(metrics)
 
 trainer.save_model("./alephbert")
+tokenizer.save_pretrained("./alephbert")
