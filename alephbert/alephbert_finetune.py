@@ -43,7 +43,6 @@ training_args = TrainingArguments(
     num_train_epochs=30,
     per_gpu_train_batch_size=16,
     save_steps=10_000,
-    save_total_limit=2,
     prediction_loss_only=True,
 )
 
