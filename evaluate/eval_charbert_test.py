@@ -17,8 +17,8 @@ from tqdm import tqdm
 
 pipe = pipeline(
     "fill-mask",
-    model="bert-base-multilingual-cased",
-    tokenizer=r"..\char-base-hebrew-bert\model"
+    model="char-base-hebrew-bert/model",
+    tokenizer=r"char-base-hebrew-bert/model"
 )
 # print(fill_mask.tokenizer.tokenize("שלום עליכם"))
 

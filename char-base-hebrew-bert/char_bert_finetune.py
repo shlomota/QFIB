@@ -10,7 +10,7 @@ from transformers import LineByLineTextDataset
 fill_mask = pipeline(
     "fill-mask",
     model="./char-base-hebrew-bert/model/",
-    tokenizer="./model"
+    tokenizer="./char-base-hebrew-bert/model"
 )
 
 

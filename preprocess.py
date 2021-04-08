@@ -11,6 +11,7 @@ from vocabulary import Vocabulary
 MASK_CHAR = "_"
 PAD_CHAR = "p"
 SOS_CHAR = "s"
+UNK_CHAR = "u"
 MAX_LEN = 256
 MAX_MASK_LEN = 40
 
@@ -33,6 +34,8 @@ def generate_dataset():
     #add sos char
     sents = [SOS_CHAR + sent for sent in sents]
     padded = [sent[:MAX_LEN] + PAD_CHAR*(MAX_LEN - len(sent)) for sent in sents]
+    lengths = [len(sent) for sent in padded]
+    assert np.all(np.array(lengths) == MAX_LEN)
 
 
     # just used to make dict
@@ -40,11 +43,11 @@ def generate_dataset():
         vocab = joblib.load(VOCAB_PATH)
     else:
         cv = CountVectorizer(analyzer="char", encoding="utf8")
-        cv.fit(sents+[MASK_CHAR + PAD_CHAR])
+        cv.fit(sents+[MASK_CHAR + PAD_CHAR + UNK_CHAR])
         vocab = Vocabulary(cv.vocabulary_)
         joblib.dump(vocab, VOCAB_PATH)
 
-    processed = np.array([[vocab.w2i[char] for char in sent if char in vocab.w2i] for sent in padded])
+    processed = np.array([[vocab.w2i[char] for char in sent] for sent in padded])
 
 
 
