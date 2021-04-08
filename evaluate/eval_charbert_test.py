@@ -2,6 +2,10 @@ import transformers
 from transformers import pipeline
 import torch
 from transformers.tokenization_utils import TruncationStrategy
+import random
+import numpy as np
+from tqdm import tqdm
+
 
 
 # pipe = pipeline("fill-mask", r"..\char-base-hebrew-bert\model")#, tokenizer="./model")
@@ -123,11 +127,6 @@ correct = 0
 correct_tokens = 0
 total = 0
 total_tokens = 0
-
-
-import random
-import numpy as np
-from tqdm import tqdm
 
 def pad_prediction(pred, target):
     pred = pred[:len(target)]

@@ -51,8 +51,9 @@ hebert = pipeline(
 alephbert = pipeline(
     "fill-mask",
     # model="onlplab/alephbert-base",
-    # model="./alephbert_1_epoch",
-    model="./alephbert_10_epochs",
+    # model="./alephbert/alephbert_1_epoch",
+    model="./alephbert/alephbert_40_epochs",
+    # model=r"C:\Users\soki\PycharmProjects\QFIB\alephbert\alephbert_40_epochs",
     tokenizer="onlplab/alephbert-base",
 )
 
@@ -66,7 +67,7 @@ models = [hebert, alephbert, gru_model]
 
 
 with open(r"C:\Users\soki\PycharmProjects\QFIB\data\test_data.txt", "r", encoding="utf8") as f:
-    lines = f.readlines()[:100]
+    lines = f.readlines()#[:100]
     
 correct = [0] * len(model_names)
 correct_tokens = [0] * len(model_names)
@@ -94,8 +95,8 @@ for line in tqdm(lines):
         e += 1
     y = line[s + 1:e]
 
-    # for i in range(len(model_names)):
-    for i in [1]:
+    for i in range(len(model_names)):
+    # for i in [1]:
         if token_based_model[i]:
             updated_line = line[:s] + " [MASK]" + line[e:]
             results = models[i](updated_line, top_k=10)
