@@ -9,7 +9,7 @@ import logging
 # )
 fill_mask = pipeline(
     "fill-mask",
-    model="./alephbert/checkpoint-40000",
+    model="./alephbert./alephbert_40_ecpochs",
     tokenizer="onlplab/alephbert-base"
 )
 
@@ -56,8 +56,8 @@ trainer = Trainer(
 
 trainer.train()
 
-trainer.save_model("./alephbert")
-tokenizer.save_pretrained("./alephbert")
+trainer.save_model("./alephbert/alephbert")
+tokenizer.save_pretrained("./alephbert/alephbert")
 
 logging.info("Started evaluation on train!")
 metrics = trainer.evaluate(eval_dataset=dataset)

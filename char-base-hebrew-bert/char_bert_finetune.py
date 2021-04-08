@@ -24,7 +24,7 @@ dataset = LineByLineTextDataset(
 
 eval_dataset = LineByLineTextDataset(
     tokenizer=tokenizer,
-    file_path="../data/test_data.txt",
+    file_path="./data/test_data.txt",
     block_size=128,
 )
 
