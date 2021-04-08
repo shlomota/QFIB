@@ -4,7 +4,7 @@ import os
 import numpy
 
 def my_filter(line):
-    illegal_li = ["damage", "×", "x", "-", "־", "break", "vacat", "[", "]"]
+    # illegal_li = ["damage", "×", "x", "-", "־", "break", "vacat", "[", "]"]
     min_len = 30
     if len(line) < min_len:
         return False
