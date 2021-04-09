@@ -120,7 +120,8 @@ pipe._parse_and_tokenize = _parse_and_tokenize
 # text = "Happy birthday to y[MASK]u"
 # print(pipe(text)[0])
 
-with open(r"C:\Users\soki\PycharmProjects\QFIB\data\test_data.txt", "r", encoding="utf8") as f:
+# with open(r"C:\Users\soki\PycharmProjects\QFIB\data\test_data.txt", "r", encoding="utf8") as f:
+with open(r"C:\Users\soki\PycharmProjects\QFIB\data\full_training_set.txt", "r", encoding="utf8") as f:
     lines = f.readlines()[:100]
 
 correct = 0
@@ -145,13 +146,13 @@ for line in tqdm(lines):
 
     s = e = start_mask
     # e = start_mask
-    while s > 0 and line[s] != " ":
-        s -= 1
-    while e < len(line) and line[e] != " ":
-        e += 1
+    # while s > 0 and line[s] != " ":
+    #     s -= 1
+    # while e < len(line) and line[e] != " ":
+    #     e += 1
     y = line[s + 1:e]
 
-    updated_line = line[:s] + " " + "[MASK]" * (e-s-1) + line[e:]
+    updated_line = (line[:s] + " ") * (s>0) + "[MASK]" * (e-s-(s>0)) + line[e:]
     # assert len(updated_line) == len(line)
     result = unmask_multi(updated_line)[0][s+1:e]
 

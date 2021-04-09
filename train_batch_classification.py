@@ -72,7 +72,7 @@ def evaluate(test_set, enc, print_sentences=True):
         num_batches = int(np.ceil(len(test_set) / BATCH_SIZE))
         # random.shuffle(train_set)
 
-        for i in tqdm(range(num_batches)):
+        for i in range(num_batches):
             # x, y = train_set[["x", "y"]].values[:,:]
             x_batch = test_set["x"].values[i*BATCH_SIZE:(i+1)*BATCH_SIZE]
             y_batch = test_set["y"].values[i*BATCH_SIZE:(i+1)*BATCH_SIZE]
@@ -131,11 +131,11 @@ def train(n_epochs, train_set, dev_set, enc, criterion,
 
     encoder_optimizer = optim.Adam(enc.parameters())
 
-    for epoch in range(1, n_epochs + 1):
+    for epoch in tqdm(range(1, n_epochs + 1)):
         train_set = train_set.sample(frac=1)
         num_batches = int(np.ceil(len(train_set) / BATCH_SIZE))
 
-        for i in tqdm(range(num_batches)):
+        for i in range(num_batches):
             # x, y = train_set[["x", "y"]].values[:,:]
             x_batch = train_set["x"].values[i*BATCH_SIZE:(i+1)*BATCH_SIZE]
             y_batch = train_set["y"].values[i*BATCH_SIZE:(i+1)*BATCH_SIZE]

@@ -4,6 +4,7 @@ from pprint import pprint
 # model = AutoModel.from_pretrained("avichr/heBERT")
 
 from transformers import pipeline
+from preprocess import MAX_LEN
 from tqdm import tqdm
 import random
 import numpy as np
@@ -36,6 +37,18 @@ def predict_my_model(sent, model):
     preds = torch.argmax(preds, dim=-1)
     return "".join([model.vocab.i2w[index] for index in preds.tolist()])
 
+def predict_my_model_iterative(sent, model):
+    input_tensor = torch.tensor([model.vocab.w2i[char] for char in sent]).to(DEVICE)
+    preds = []
+    while model.vocab.w2i[MASK_CHAR] in input_tensor:
+        encoder_outputs, encoder_h_m = model(input_tensor.unsqueeze(0))
+        index = torch.where(input_tensor==model.vocab.w2i[MASK_CHAR])[0][0]
+        pred = encoder_outputs.squeeze()[index]
+        pred = torch.argmax(pred, dim=-1)
+        preds += [pred.item()]
+        input_tensor[index] = pred.item()
+    return "".join([model.vocab.i2w[index] for index in preds])
+
 def get_best_result(results, len_y):
     for res in results:
         if len(res["token_str"]) == len_y:
@@ -59,15 +72,21 @@ alephbert = pipeline(
 
 hebert.model.eval()
 alephbert.model.eval()
-gru_model = torch.load(r"C:\Users\soki\PycharmProjects\QFIB\parameters\enc_model_bible\enc_40.pt")
+# gru_model = torch.load(r"C:\Users\soki\PycharmProjects\QFIB\parameters\enc_model_bible\enc_40.pt")
+gru_model = torch.load(r"C:\Users\soki\PycharmProjects\QFIB\parameters\enc_model_all_training\enc_14.pt")
 
 model_names = ["heBERT", "alephBERT", "GRU"]
 token_based_model = [True, True, False]
 models = [hebert, alephbert, gru_model]
 
+do_sample = True
+num_samples = 100
 
-with open(r"C:\Users\soki\PycharmProjects\QFIB\data\test_data.txt", "r", encoding="utf8") as f:
-    lines = f.readlines()#[:100]
+# with open(r"C:\Users\soki\PycharmProjects\QFIB\data\test_data.txt", "r", encoding="utf8") as f:
+with open(r"C:\Users\soki\PycharmProjects\QFIB\data\full_training_set.txt", "r", encoding="utf8") as f:
+    lines = f.readlines()
+    if do_sample:
+        lines = random.sample(lines, k=num_samples)
     
 correct = [0] * len(model_names)
 correct_tokens = [0] * len(model_names)
@@ -96,7 +115,7 @@ for line in tqdm(lines):
     y = line[s + 1:e]
 
     for i in range(len(model_names)):
-    # for i in [1]:
+    # for i in [2]:
         if token_based_model[i]:
             updated_line = line[:s] + " [MASK]" + line[e:]
             results = models[i](updated_line, top_k=10)
@@ -105,15 +124,18 @@ for line in tqdm(lines):
 
             # multi mask
             while len(result) < len(y):
-                updated_line = line[:s] + " " + result + "[MASK]" + line[e:]
+
+                updated_line = (line[:s] + " ") * (s > 0) + result + "[MASK]" + line[e:]
                 results = models[i](updated_line, top_k=10)
                 result += get_best_result(results, len(y) - len(result))
                 # result += models[i](updated_line)[0]["token_str"]
         else:
-            updated_line = line[:s] + " " + MASK_CHAR * (e-s-1) + line[e:]
-            assert len(updated_line) == len(line)
-            result = predict_my_model(updated_line, models[i])
-    
+            updated_line = "s" + (line[:s] + " ") * (s > 0) + MASK_CHAR * (e-s-(s>0)) + line[e:] + "p"# * (MAX_LEN - len(line))
+            # assert len(updated_line) == len(line)
+            # result = result1 = predict_my_model(updated_line, models[i])
+            result = result2 = predict_my_model_iterative(updated_line, models[i])
+            # a=5
+
 
         if i == 1:
             sum_predicted_len += len(result)
