@@ -74,6 +74,7 @@ hebert.model.eval()
 alephbert.model.eval()
 # gru_model = torch.load(r"C:\Users\soki\PycharmProjects\QFIB\parameters\enc_model_bible\enc_40.pt")
 gru_model = torch.load(r"C:\Users\soki\PycharmProjects\QFIB\parameters\enc_model_all_training\enc_14.pt")
+# gru_model = torch.load(r"C:\Users\soki\PycharmProjects\QFIB\parameters\enc_model_all_training\enc_40.pt")
 
 model_names = ["heBERT", "alephBERT", "GRU"]
 token_based_model = [True, True, False]
@@ -82,8 +83,9 @@ models = [hebert, alephbert, gru_model]
 do_sample = True
 num_samples = 100
 
-# with open(r"C:\Users\soki\PycharmProjects\QFIB\data\test_data.txt", "r", encoding="utf8") as f:
-with open(r"C:\Users\soki\PycharmProjects\QFIB\data\full_training_set.txt", "r", encoding="utf8") as f:
+with open(r"C:\Users\soki\PycharmProjects\QFIB\data\test_data.txt", "r", encoding="utf8") as f:
+# with open(r"C:\Users\soki\PycharmProjects\QFIB\data\test_data_CD.txt", "r", encoding="utf8") as f:
+# with open(r"C:\Users\soki\PycharmProjects\QFIB\data\full_training_set.txt", "r", encoding="utf8") as f:
     lines = f.readlines()
     if do_sample:
         lines = random.sample(lines, k=num_samples)

@@ -9,7 +9,8 @@ import logging
 # )
 fill_mask = pipeline(
     "fill-mask",
-    model="./alephbert./alephbert_40_ecpochs",
+    # model="./alephbert./alephbert_40_ecpochs",
+    model="onlplab/alephbert-base",
     tokenizer="onlplab/alephbert-base"
 )
 
@@ -38,9 +39,9 @@ data_collator = DataCollatorForLanguageModeling(
 from transformers import Trainer, TrainingArguments
 
 training_args = TrainingArguments(
-    output_dir="./alephbert",
+    output_dir="./alephbert/alephbert",
     overwrite_output_dir=True,
-    num_train_epochs=30,
+    num_train_epochs=40,
     per_gpu_train_batch_size=16,
     save_steps=10_000,
     prediction_loss_only=True,
