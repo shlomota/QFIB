@@ -85,7 +85,7 @@ char_acc = []
 token_acc = []
 
 
-ITERS = 16
+ITERS = 14
 for i in range(1, ITERS + 1):
     pipe = pipeline(
         "fill-mask",
