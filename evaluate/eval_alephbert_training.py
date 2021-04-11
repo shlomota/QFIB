@@ -73,7 +73,7 @@ with open(r"C:\Users\soki\PycharmProjects\QFIB\data\test_data.txt", "r", encodin
 
 
 ITERS = 8
-for i in range(ITERS):
+for i in range(1, ITERS + 1):
     alephbert = pipeline(
         "fill-mask",
         # model="onlplab/alephbert-base",
@@ -145,13 +145,13 @@ for i in range(ITERS):
     char_acc += [correct / total]
     token_acc += [correct_tokens / total_tokens]
 
-plt.plot(range(ITERS), char_acc)
+plt.plot(range(1, ITERS + 1), char_acc)
 plt.title("Character accuracy")
 plt.ylabel("char_acc")
 plt.xlabel("x*10000 samples")
 plt.savefig(f"./alephbert/alephbert/char_acc.png")
 
-plt.plot(range(ITERS), token_acc)
+plt.plot(range(1, ITERS + 1), token_acc)
 plt.title("Token accuracy")
 plt.ylabel("token_acc")
 plt.xlabel("x*10000 samples")
