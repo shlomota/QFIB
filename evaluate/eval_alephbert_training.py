@@ -61,7 +61,7 @@ def get_best_result(results, len_y):
 
 random.seed(42)
 do_sample = True
-num_samples = 100
+num_samples = 1000
 
 char_acc = []
 token_acc = []
@@ -102,15 +102,11 @@ for i in range(1, ITERS + 1):
 
     random.seed(42)
     for line in tqdm(lines):
-        # mask_len = random.randint(1, min(len(processed_sent), MAX_MASK))
-        # mask_len = int(MASK_RATIO * len(line))
-
         start_mask = random.randint(0, len(line) - 1)
         while line[start_mask] == " ":
             start_mask = random.randint(0, len(line) - 1)
 
         s = e = start_mask
-        # e = start_mask
         while s > 0 and line[s] != " ":
             s -= 1
         while e < len(line) and line[e] != " ":
