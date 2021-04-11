@@ -135,8 +135,8 @@ for i in range(1, ITERS + 1):
         if result == y:
             correct_tokens += 1
 
-    total += e - s
-    total_tokens += 1
+        total += e - s
+        total_tokens += 1
 
 
     print(f"samples viewed: {i}0000") #4880 ratio
