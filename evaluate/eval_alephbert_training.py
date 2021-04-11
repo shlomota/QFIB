@@ -69,8 +69,8 @@ token_acc = []
 #Read data
 # with open(r"C:\Users\soki\PycharmProjects\QFIB\data\full_training_set.txt", "r", encoding="utf8") as f:
 # with open(r"C:\Users\soki\PycharmProjects\QFIB\data\test_data.txt", "r", encoding="utf8") as f:
-with open(r"./data/full_training_set.txt", "r", encoding="utf8") as f:
-# with open(r"./data/test_data.txt", "r", encoding="utf8") as f:
+# with open(r"./data/full_training_set.txt", "r", encoding="utf8") as f:
+with open(r"./data/test_data.txt", "r", encoding="utf8") as f:
     lines = f.readlines()
     if do_sample:
         lines = random.sample(lines, k=num_samples)
@@ -149,11 +149,11 @@ plt.plot(range(1, ITERS + 1), char_acc)
 plt.title("Character accuracy")
 plt.ylabel("char_acc")
 plt.xlabel("x*10000 samples")
-plt.savefig(f"./alephbert/alephbert/train_char_acc.png")
+plt.savefig(f"./alephbert/alephbert/test_char_acc.png")
 plt.clf()
 
 plt.plot(range(1, ITERS + 1), token_acc)
 plt.title("Token accuracy")
 plt.ylabel("token_acc")
 plt.xlabel("x*10000 samples")
-plt.savefig(f"./alephbert/alephbert/train_token_acc.png")
+plt.savefig(f"./alephbert/alephbert/test_token_acc.png")
