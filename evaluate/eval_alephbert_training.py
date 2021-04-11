@@ -1,3 +1,5 @@
+import os
+print(os.getcwd())
 from transformers import AutoTokenizer, AutoModel
 from pprint import pprint
 # tokenizer = AutoTokenizer.from_pretrained("avichr/heBERT")
