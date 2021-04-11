@@ -1,12 +1,10 @@
 import os
-print(os.getcwd())
 from transformers import AutoTokenizer, AutoModel
 from pprint import pprint
 # tokenizer = AutoTokenizer.from_pretrained("avichr/heBERT")
 # model = AutoModel.from_pretrained("avichr/heBERT")
 
 from transformers import pipeline
-from preprocess import MAX_LEN
 from tqdm import tqdm
 import random
 import numpy as np
@@ -14,7 +12,9 @@ import torch
 import joblib
 import matplotlib.pyplot as plt
 
-from preprocess import MASK_CHAR
+# from preprocess import MAX_LEN
+# from preprocess import MASK_CHAR
+MASK_CHAR = "_"
 DEVICE = "cuda:0"
 
 def fill_multi(text, fill_mask):
