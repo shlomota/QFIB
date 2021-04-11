@@ -63,6 +63,15 @@ hebert = pipeline(
 
 alephbert = pipeline(
     "fill-mask",
+    model="onlplab/alephbert-base",
+    # model="./alephbert/alephbert_1_epoch",
+    # model="./alephbert/alephbert_40_epochs",
+    # model=r"C:\Users\soki\PycharmProjects\QFIB\alephbert\alephbert_40_epochs",
+    tokenizer="onlplab/alephbert-base",
+)
+
+scrollbert = pipeline(
+    "fill-mask",
     # model="onlplab/alephbert-base",
     # model="./alephbert/alephbert_1_epoch",
     model="./alephbert/alephbert_40_epochs",
@@ -70,18 +79,35 @@ alephbert = pipeline(
     tokenizer="onlplab/alephbert-base",
 )
 
+mbert = pipeline(
+    "fill-mask",
+    model="bert-base-multilingual-cased",
+    tokenizer="bert-base-multilingual-cased",
+)
+
 hebert.model.eval()
 alephbert.model.eval()
+scrollbert.model.eval()
+mbert.model.eval()
+
 # gru_model = torch.load(r"C:\Users\soki\PycharmProjects\QFIB\parameters\enc_model_bible\enc_40.pt")
 gru_model = torch.load(r"C:\Users\soki\PycharmProjects\QFIB\parameters\enc_model_all_training\enc_14.pt")
 # gru_model = torch.load(r"C:\Users\soki\PycharmProjects\QFIB\parameters\enc_model_all_training\enc_40.pt")
 
-model_names = ["heBERT", "alephBERT", "GRU"]
-token_based_model = [True, True, False]
-models = [hebert, alephbert, gru_model]
+# model_names = ["heBERT", "alephBERT", "GRU"]
+# token_based_model = [True, True, False]
+# models = [hebert, alephbert, gru_model]
+
+# model_names = ["heBERT", "alephBERT", "mBERT"]
+# token_based_model = [True, True, True]
+# models = [hebert, alephbert, mbert]
+
+model_names = ["alephBERT", "scrollBERT"]
+token_based_model = [True, True]
+models = [alephbert, scrollbert]
 
 do_sample = True
-num_samples = 100
+num_samples = 1000
 
 with open(r"C:\Users\soki\PycharmProjects\QFIB\data\test_data.txt", "r", encoding="utf8") as f:
 # with open(r"C:\Users\soki\PycharmProjects\QFIB\data\test_data_CD.txt", "r", encoding="utf8") as f:

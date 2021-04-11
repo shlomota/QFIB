@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 # from preprocess import MAX_LEN
 # from preprocess import MASK_CHAR
 MASK_CHAR = "_"
+MAX_LEN = 512
 DEVICE = "cuda:0"
 
 def fill_multi(text, fill_mask):
@@ -102,6 +103,7 @@ for i in range(1, ITERS + 1):
 
     random.seed(42)
     for line in tqdm(lines):
+        line = line[:MAX_LEN]
         start_mask = random.randint(0, len(line) - 1)
         while line[start_mask] == " ":
             start_mask = random.randint(0, len(line) - 1)
