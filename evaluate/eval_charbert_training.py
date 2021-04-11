@@ -73,7 +73,7 @@ def unmask_multi(query, top_k=5):
 
 
 random.seed(42)
-num_samples = 1000
+num_samples = 100
 do_sample = True
 with open(r"./data/test_data.txt", "r", encoding="utf8") as f:
 # with open(r"./data/full_training_set.txt", "r", encoding="utf8") as f:
@@ -138,12 +138,12 @@ plt.plot(range(1, ITERS + 1), char_acc)
 plt.title("Character accuracy")
 plt.ylabel("char_acc")
 plt.xlabel("x*10000 samples")
-plt.savefig(f"./char-base-hebrew-bert/char-bert/char_acc.png")
+plt.savefig(f"./char-base-hebrew-bert/char-bert/test_char_acc.png")
 plt.clf()
 
 plt.plot(range(1, ITERS + 1), token_acc)
 plt.title("Token accuracy")
 plt.ylabel("token_acc")
 plt.xlabel("x*10000 samples")
-plt.savefig(f"./char-base-hebrew-bert/char-bert/token_acc.png")
+plt.savefig(f"./char-base-hebrew-bert/char-bert/test_token_acc.png")
 
