@@ -68,7 +68,9 @@ token_acc = []
 
 #Read data
 # with open(r"C:\Users\soki\PycharmProjects\QFIB\data\full_training_set.txt", "r", encoding="utf8") as f:
-with open(r"C:\Users\soki\PycharmProjects\QFIB\data\test_data.txt", "r", encoding="utf8") as f:
+# with open(r"C:\Users\soki\PycharmProjects\QFIB\data\test_data.txt", "r", encoding="utf8") as f:
+# with open(r"./data/full_training_set.txt", "r", encoding="utf8") as f:
+with open(r"./data/test_data.txt", "r", encoding="utf8") as f:
     lines = f.readlines()
     if do_sample:
         lines = random.sample(lines, k=num_samples)
