@@ -76,7 +76,7 @@ with open(r"./data/test_data.txt", "r", encoding="utf8") as f:
         lines = random.sample(lines, k=num_samples)
 
 
-ITERS = 15
+ITERS = 16
 for i in range(1, ITERS + 1):
     alephbert = pipeline(
         "fill-mask",
